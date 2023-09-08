@@ -8,7 +8,7 @@ Original file is located at
 """
 
 
-import  streamlit as st
+import streamlit as st
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 from PIL import Image
@@ -17,14 +17,14 @@ import string
 import nltk
 import spacy
 
-with open("/content/tfidf_vectorizer (2).pkl","rb") as file:
-  model = pickle.load(file)
+with open("svm_model.pkl", "rb") as file:
+    model = pickle.load(file)
 
-with open("/content/svm_model.pkl",'rb') as file:
-  vectorizer =pickle.load(file)
+with open("tfidf_vectorizer.pkl", "rb") as file:
+    vectorizer = pickle.load(file)
+
 nltk.download('stopwords')
-stopwords =nltk.corpus.stopwords.words('english')
-
+stopwords = nltk.corpus.stopwords.words('english')
 
 def clean_text(text):
     text = text.lower()
@@ -49,7 +49,31 @@ def lemmatizer(text):
     return ' '.join(sent)
 
 st.title("Sentiment Analysis App")
-st.markdown("By KONDETI PAVANI")
-image = Image.open("/content/sentiment analysis.png")
+st.markdown("By Nirmal Gaud")
+image = Image.open("/content/1_e90_bvVf9Agxfk4DxWu7og.jpg")
 st.image(image, use_column_width=True)
 
+st.subheader("Enter your text here:")
+user_input = st.text_area("")
+
+if user_input:
+    user_input = clean_text(user_input)
+    user_input = remove_punctuation(user_input)
+    user_input = user_input.lower()
+    user_input = tokenization(user_input)
+    user_input = remove_stopwords(user_input)
+    user_input = lemmatizer(user_input)
+
+if st.button("Predict"):
+    if user_input:
+        text_vectorized = vectorizer.transform([user_input])
+        prediction = model.predict(text_vectorized)[0]
+        st.header("Prediction:")
+        if prediction == -1:
+            st.subheader("The sentiment of the given text is: Negative")
+        elif prediction == 0:
+            st.subheader("The sentiment of the given text is: Neutral")
+        elif prediction == 1:
+            st.subheader("The sentiment of the given text is: Positive")
+    else:
+        st.subheader("Please enter a text for prediction.")
